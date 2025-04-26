@@ -6,9 +6,10 @@ import json
 from pathlib import Path
 import whisper
 from resemblyzer.hparams import sampling_rate
+import time
 
 from diarize import diarize
-from transcribe import assign_speakers_to_whisper, merge_consecutive_speaker_segments
+from transcribe import combine_segments_by_sentence, assign_speakers_to_whisper, merge_consecutive_speaker_segments
 from pdf import segments_to_pdf
 from utils import convert_to_serializable
 
@@ -22,7 +23,7 @@ video_path = args.video_path
 filename = Path(video_path).stem
 
 # Create speaker diarization segments
-segments = diarize(video_path, n_speakers=args.n_speakers)
+diarize_segments = diarize(video_path, n_speakers=args.n_speakers)
 
 # Transcribe with Whisper
 # Create cache to avoid repeating long transcribe process
@@ -42,8 +43,11 @@ else:
     with open(segments_path, "w") as f:
         json.dump(result, f, indent=4, default=convert_to_serializable)
 
+whisper_segments = result["segments"]
+
 # Combine speaker diarization with audio transcription
-combined = assign_speakers_to_whisper(result["segments"], segments)
-speaker_segments = merge_consecutive_speaker_segments(combined)
+assigned = assign_speakers_to_whisper(whisper_segments, diarize_segments)
+speaker_segments = merge_consecutive_speaker_segments(assigned)
+
 segments_to_pdf(filename, speaker_segments)
 

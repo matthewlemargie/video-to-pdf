@@ -1,4 +1,49 @@
+import re
+
+def combine_segments_by_sentence(segments):
+    combined = []
+    buffer = ""
+    start_time = None
+    end_time = None
+    current_speaker = None
+
+    for seg in segments:
+        text = seg["text"].strip()
+        speaker = seg["speaker"]
+
+        if buffer == "":
+            start_time = seg["start"]
+            current_speaker = speaker
+
+        buffer += (" " if buffer else "") + text
+        end_time = seg["end"]
+
+        # If sentence ends, flush it
+        if re.search(r'[.!?]["\']?$|["\']?[.!?]$', text.strip()):
+            combined.append({
+                "speaker": current_speaker,
+                "start": start_time,
+                "end": end_time,
+                "text": buffer.strip()
+            })
+            buffer = ""
+            start_time = None
+            end_time = None
+            current_speaker = None
+
+    # Handle any leftover buffer (e.g. if no punctuation at end)
+    if buffer:
+        combined.append({
+            "speaker": current_speaker,
+            "start": start_time,
+            "end": end_time,
+            "text": buffer.strip()
+        })
+
+    return combined
+
 def assign_speakers_to_whisper(whisper_segments, diarization_segments):
+
     labeled = []
 
     for seg in whisper_segments:
@@ -30,6 +75,8 @@ def assign_speakers_to_whisper(whisper_segments, diarization_segments):
 def merge_consecutive_speaker_segments(segments):
     merged = []
     buffer = []
+
+    segments = combine_segments_by_sentence(segments)
 
     for seg in segments:
         if not buffer or seg['speaker'] == buffer[-1]['speaker']:

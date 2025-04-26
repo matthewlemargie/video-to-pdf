@@ -1,0 +1,22 @@
+name: video-to-pdf
+channels:
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - cudatoolkit=11.2.2
+  - cudnn=8.1.0
+  - numpy<2
+  - pip:
+      - torch==2.2.2+cu118
+      - torchvision==0.17.2+cu118
+      - torchaudio==2.2.2+cu118
+      - --extra-index-url https://download.pytorch.org/whl/cu118
+      - ffmpeg-python
+      - soundfile
+      - resemblyzer
+      - scikit-learn
+      - openai-whisper
+

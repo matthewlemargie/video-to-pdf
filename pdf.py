@@ -10,18 +10,13 @@ def segments_to_pdf(filename, speaker_segments):
     tex_filename = f"{filename}.tex"
     with open(tex_filename, "w") as f:
         f.write(r"""\documentclass[12pt]{article}
-                \usepackage[margin=1in]{geometry}
-                \usepackage{parskip}
-                \usepackage{titlesec}
-                \usepackage{lmodern}
-                \titleformat{\section}{\normalfont\Large\bfseries}{}{0em}{}
-                \renewcommand{\familydefault}{\sfdefault}
-                \begin{document}
-                \title{Video Transcript}
-                \author{}
-                \date{}
-                \maketitle
-                """)
+                       \usepackage[utf8]{inputenc}
+                       \usepackage{geometry}
+                       \geometry{margin=1in}
+                       \title{Transcript}
+                       \begin{document}
+                       \maketitle
+                       """)
         for seg in speaker_segments:
             f.write(f"\\section*{{{seg['speaker']}}}\n")
             f.write(seg['text'].replace("\n", " ") + "\n\n")
